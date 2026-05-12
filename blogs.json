@@ -1,0 +1,12 @@
+{
+  "posts": [
+    {
+      "title": "Welcome",
+      "file": "blogs/welcome.md",
+      "date": "2026-05-12",
+      "tag": "beginning",
+      "excerpt": "Every journal needs a first entry, so here's mine. Consider this the door swinging open."
+    }
+    
+  ]
+}

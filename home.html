@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Journal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #2a1f14;
+      --ink-mid:   #6b5744;
+      --ink-light: #a89482;
+      --paper:     #faf7f2;
+      --paper-2:   #f2ede4;
+      --accent:    #FE6244;
+      --accent-lt: #f0ddd0;
+      --rule:      #e0d5c8;
+      --serif:     'Lora', Georgia, serif;
+      --sans:      'DM Sans', system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      border-bottom: 1px solid var(--rule);
+      padding: 0 2rem;
+      background: var(--paper);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      gap: 1.5rem;
+    }
+    .site-name {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      color: var(--ink);
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .site-name span { color: var(--accent); }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 380px;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ink-light);
+      pointer-events: none;
+    }
+    #search {
+      width: 100%;
+      padding: 8px 12px 8px 38px;
+      border: 1px solid var(--rule);
+      border-radius: 24px;
+      background: var(--paper-2);
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #search:focus { border-color: var(--accent); }
+    #search::placeholder { color: var(--ink-light); }
+
+    /* ── HERO ── */
+    .hero {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1rem 1rem 1.5rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .hero-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.2;
+      color: var(--ink);
+      max-width: 600px;
+    }
+    .hero p {
+      margin-top: 1rem;
+      color: var(--ink-mid);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 520px;
+    }
+
+    /* ── BLOG LIST ── */
+    #list-view {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem;
+    }
+
+    .posts-meta {
+      font-size: 0.8rem;
+      color: var(--ink-light);
+      margin-bottom: 1.5rem;
+    }
+
+    .post-grid {
+      display: grid;
+      gap: 0;
+    }
+
+    .post-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 1rem;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--rule);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s;
+      border-radius: 4px;
+    }
+    .post-card:hover .post-title { color: var(--accent); }
+
+    .post-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+    .post-title {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      line-height: 1.35;
+      color: var(--ink);
+      transition: color 0.2s;
+      margin-bottom: 0.4rem;
+    }
+    .post-excerpt {
+      font-size: 0.875rem;
+      color: var(--ink-mid);
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .post-date {
+      font-size: 0.78rem;
+      color: var(--ink-light);
+      white-space: nowrap;
+      padding-top: 0.25rem;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 4rem 0;
+      color: var(--ink-light);
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.1rem;
+    }
+
+    /* ── BLOG POST VIEW ── */
+    #post-view {
+      display: none;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 5rem;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--ink-mid);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: var(--sans);
+      padding: 0;
+      margin-bottom: 2.5rem;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--accent); }
+
+    .post-header { margin-bottom: 2.5rem; }
+    .post-header .post-tag { font-size: 0.75rem; }
+    .post-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      line-height: 1.25;
+      margin: 0.5rem 0 0.75rem;
+    }
+    .post-header .meta {
+      font-size: 0.82rem;
+      color: var(--ink-light);
+    }
+    .post-divider {
+      border: none;
+      border-top: 1px solid var(--rule);
+      margin: 2rem 0;
+    }
+
+    /* Markdown styles */
+    #post-body { line-height: 1.85; color: var(--ink); }
+    #post-body h1, #post-body h2, #post-body h3 {
+      font-family: var(--serif);
+      color: var(--ink);
+      margin: 2rem 0 0.75rem;
+    }
+    #post-body h1 { font-size: 1.6rem; }
+    #post-body h2 { font-size: 1.3rem; }
+    #post-body h3 { font-size: 1.1rem; }
+    #post-body p { margin-bottom: 1.25rem; font-size: 1.05rem; }
+    #post-body a { color: var(--accent); text-underline-offset: 3px; }
+    #post-body blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 1.5rem 0;
+      padding: 0.5rem 0 0.5rem 1.25rem;
+      color: var(--ink-mid);
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.05rem;
+    }
+    #post-body ul, #post-body ol {
+      margin: 0 0 1.25rem 1.5rem;
+      font-size: 1.05rem;
+    }
+    #post-body li { margin-bottom: 0.4rem; }
+    #post-body code {
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.88em;
+    }
+    #post-body pre {
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+    }
+    #post-body pre code { background: none; border: none; padding: 0; font-size: 0.9rem; }
+    #post-body img { max-width: 100%; border-radius: 6px; margin: 1rem 0; }
+    #post-body hr { border: none; border-top: 1px solid var(--rule); margin: 2rem 0; }
+
+    /* Loading state */
+    .loading {
+      text-align: center;
+      padding: 4rem;
+      color: var(--ink-light);
+      font-family: var(--serif);
+      font-style: italic;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--rule);
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.8rem;
+      color: var(--ink-light);
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 0 1rem; }
+      .hero, #list-view, #post-view { padding-left: 1rem; padding-right: 1rem; }
+      .post-card { grid-template-columns: 1fr; }
+      .post-date { padding-top: 0; }
+      .header-inner { height: auto; padding: 0.75rem 0; flex-wrap: wrap; }
+      .search-wrap { max-width: 100%; order: 3; flex-basis: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <a class="site-name" onclick="showList()">Feeling<span>Alive</span></a>
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="search" placeholder="Search posts…" oninput="filterPosts()" aria-label="Search posts" />
+      </div>
+    </div>
+  </header>
+
+  <!-- LIST VIEW -->
+  <div id="list-view">
+    <div class="hero">
+      <h1>Thoughts, stories &amp; everything in between.</h1>
+      <p>A quiet corner where I write about life, observations, and whatever's on my mind.</p>
+    </div>
+
+    <div style="padding-top: 2rem;">
+      <p class="posts-meta" id="posts-meta"></p>
+      <div class="post-grid" id="post-grid">
+        <div class="loading">Loading posts…</div>
+      </div>
+      <p class="no-results" id="no-results" style="display:none;">No posts found. Try a different search.</p>
+    </div>
+  </div>
+
+  <!-- POST VIEW -->
+  <div id="post-view">
+    <button class="back-btn" onclick="showList()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      All posts
+    </button>
+    <div class="post-header">
+<span class="post-tag" id="post-tag-display"></span>
+      <h1 id="post-title-display"></h1>
+<p class="meta" id="post-meta-display"></p> 
+    </div>
+    <hr class="post-divider" />
+    <div id="post-body"></div>
+  </div>
+
+  <footer>
+    <p>Written by <i>Rupesh</i> &mdash; &copy; <span id="yr"></span></p>
+  </footer>
+
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    let allPosts = [];
+
+    /* ── Load blogs.json ── */
+    async function init() {
+      try {
+        const res = await fetch('blogs.json');
+        const data = await res.json();
+        allPosts = data.posts || data; // support both {posts:[]} and []
+        renderList(allPosts);
+      } catch (e) {
+        document.getElementById('post-grid').innerHTML =
+          '<p class="loading">Could not load posts. Make sure blogs.json is present.</p>';
+      }
+    }
+
+    /* ── Render post cards ── */
+    function renderList(posts) {
+      const grid = document.getElementById('post-grid');
+      const meta = document.getElementById('posts-meta');
+      const none = document.getElementById('no-results');
+
+      if (posts.length === 0) {
+        grid.innerHTML = '';
+        none.style.display = 'block';
+        meta.textContent = '';
+        return;
+      }
+      none.style.display = 'none';
+      meta.textContent = posts.length === 1 ? '1 post' : `${posts.length} posts`;
+
+      grid.innerHTML = posts.map(post => `
+        <a class="post-card" onclick="openPost(${JSON.stringify(post).replace(/"/g, '&quot;')})" role="article" href="javascript:void(0)">
+          <div>
+            ${post.tag ? `<span class="post-tag">${escHtml(post.tag)}</span>` : ''}
+            <p class="post-title">${escHtml(post.title)}</p>
+            ${post.excerpt ? `<p class="post-excerpt">${escHtml(post.excerpt)}</p>` : ''}
+          </div>
+          <span class="post-date">${post.date ? formatDate(post.date) : ''}</span>
+        </a>
+      `).join('');
+    }
+
+    /* ── Search ── */
+    function filterPosts() {
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      if (!q) { renderList(allPosts); return; }
+      const filtered = allPosts.filter(p =>
+        (p.title || '').toLowerCase().includes(q) ||
+        (p.excerpt || '').toLowerCase().includes(q) ||
+        (p.tag || '').toLowerCase().includes(q)
+      );
+      renderList(filtered);
+    }
+
+    /* ── Open a post ── */
+    async function openPost(post) {
+      document.getElementById('list-view').style.display = 'none';
+      const pv = document.getElementById('post-view');
+      pv.style.display = 'block';
+      window.scrollTo(0, 0);
+
+      document.getElementById('post-tag-display').textContent = post.tag || '';
+      document.getElementById('post-title-display').textContent = post.title || '';
+      document.getElementById('post-meta-display').textContent = post.date ? formatDate(post.date) : '';
+      document.getElementById('post-body').innerHTML = '<div class="loading">Loading…</div>';
+      document.title = (post.title || 'Post') + ' — My Journal';
+
+      try {
+        const res = await fetch(post.file);
+        if (!res.ok) throw new Error('Not found');
+        const md = await res.text();
+        document.getElementById('post-body').innerHTML = marked.parse(md);
+      } catch (e) {
+        document.getElementById('post-body').innerHTML =
+          '<p style="color:var(--ink-mid)">Could not load this post.</p>';
+      }
+    }
+
+    /* ── Back to list ── */
+    function showList() {
+      document.getElementById('post-view').style.display = 'none';
+      document.getElementById('list-view').style.display = 'block';
+      document.title = 'My Journal';
+      window.scrollTo(0, 0);
+    }
+
+    /* ── Helpers ── */
+    function formatDate(str) {
+      try {
+        return new Date(str).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      } catch { return str; }
+    }
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    init();
+  </script>
+</body>
+</html>
