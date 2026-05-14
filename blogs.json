@@ -1,6 +1,13 @@
 {
   "posts": [
     {
+      "title": "Little moments",
+      "file": "blogs/Little moments.md",
+      "date": "2026-05-14",
+      "tag": "self-discovery",
+      "excerpt": "Rushing through the streets, day after day, week after week, month after month."
+    },
+    {
       "title": "Welcome",
       "file": "blogs/welcome.md",
       "date": "2026-05-12",
